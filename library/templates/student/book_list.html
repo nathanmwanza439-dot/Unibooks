@@ -1,0 +1,87 @@
+{% extends 'student/base.html' %}
+{% block title %}Catalogue des ouvrages{% endblock %}
+
+{% block content %}
+<header class="content-header">
+  <h1 class="page-title">Catalogue des ouvrages</h1>
+  <p class="page-subtitle">Consultez et réservez les ressources académiques disponibles.</p>
+</header>
+
+<section class="filters-bar" aria-label="Outils de recherche">
+  <form method="get" class="search-form">
+    <div class="filters-row">
+      <div class="input-wrapper main-search">
+        <input type="text" name="q" placeholder="Titre, auteur, mot-clé..." value="{{ request.GET.q }}" aria-label="Rechercher un livre">
+      </div>
+
+      <div class="index-bar">
+        <label for="field" class="sr-only">Champ de recherche</label>
+        <select id="field" name="field" class="ub-select">
+          <option value="auto" {% if request.GET.field == 'auto' or not request.GET.field %}selected{% endif %}>Tous</option>
+          <option value="title" {% if request.GET.field == 'title' %}selected{% endif %}>Titre</option>
+          <option value="author" {% if request.GET.field == 'author' %}selected{% endif %}>Auteur</option>
+          <option value="isbn" {% if request.GET.field == 'isbn' %}selected{% endif %}>ISBN</option>
+          <option value="category" {% if request.GET.field == 'category' %}selected{% endif %}>Catégorie</option>
+          <option value="year" {% if request.GET.field == 'year' %}selected{% endif %}>Année</option>
+        </select>
+      </div>
+
+      <div class="select-wrapper compact">
+        <label for="status" class="sr-only">Filtrer par statut</label>
+        <select id="status" name="status" aria-label="Filtrer par statut">
+          <option value="">Tous</option>
+          <option value="available" {% if request.GET.status == 'available' %}selected{% endif %}>Disponible</option>
+          <option value="unavailable" {% if request.GET.status == 'unavailable' %}selected{% endif %}>Indisponible</option>
+        </select>
+      </div>
+
+      <div class="search-actions">
+        <button type="submit" class="ub-btn ub-btn--primary">Rechercher</button>
+      </div>
+    </div>
+  </form>
+</section>
+
+<div class="book-grid">
+  {% for book in books %}
+    <a href="{% url 'student:book_detail' book.pk %}" class="ub-card ub-card--book book-card-link" role="article">
+      <div class="cover-wrapper">
+        {% if book.image %}
+          <img src="{{ book.image.url }}" alt="Couverture de {{ book.title }}" loading="lazy">
+        {% else %}
+          <div class="cover-placeholder" aria-hidden="true">
+            <span>{{ book.title|truncatechars:1 }}</span>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="info">
+        <header class="card-header">
+          <span class="title">{{ book.title }}</span>
+          <p class="authors">{{ book.authors }}</p>
+        </header>
+
+        <footer class="card-footer">
+          <div class="meta-stats">
+            <span class="stat-item stat-likes" title="Nombre de likes">
+              <i class="fas fa-heart" aria-hidden="true"></i>
+              <strong>{{ book.likes_count|default:book.likes.count|default:0 }}</strong>
+            </span>
+
+            <span class="stat-item stat-copies" title="Exemplaires disponibles">
+              <i class="fas fa-box-open" aria-hidden="true"></i>
+              <strong>{{ book.available_copies|default:book.total_copies|default:0 }}</strong>
+              <span class="muted small">dispo</span>
+            </span>
+          </div>
+        </footer>
+      </div>
+    </a>
+  {% empty %}
+    <div class="empty-state">
+      <p>Aucun ouvrage ne correspond à votre recherche actuelle.</p>
+    </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <title>UniBooks - {% block title %}{% endblock %}</title>
+    
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  
+  {% load static %}
+  <body>
+    <a class="skip-link" href="#main">Aller au contenu</a>
+    <header class="ub-header" role="banner">
+      <button class="mobile-toggle" aria-label="Ouvrir le menu" aria-controls="site-sidebar" aria-expanded="false">
+        <i class="fas fa-bars" aria-hidden="true"></i>
+      </button>
+      <div class="ub-header-left">
+        <div class="brand">
+            <a href="/" class="brand-link">
+            <!-- Logo image restored -->
+            <img src="{% static 'images/logo_upc.png' %}" alt="UniBooks" class="brand-logo" />
+            <div class="brand-text">
+              <span class="brand-name">UniBooks</span>
+              <span class="brand-sub">Bibliothèque universitaire</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="ub-header-center">
+        <form class="search-form" action="{% url 'student:book_list' %}" method="get" role="search">
+          <label for="q" class="sr-only">Recherche de livres</label>
+          <input id="q" name="q" type="search" placeholder="Rechercher un titre, un auteur ou un ISBN" value="{{ request.GET.q|default_if_none:'' }}" />
+          <button class="ub-btn ub-btn--ghost" type="submit"><i class="fas fa-search" aria-hidden="true"></i> <span class="visually-hidden">Rechercher</span></button>
+        </form>
+      </div>
+
+      <div class="ub-header-right">
+        {% if request.user.is_authenticated %}
+          <div class="user-area">
+            <a href="{% url 'student:notifications' %}" class="notif-btn" aria-label="Notifications">
+              <i class="fas fa-bell" aria-hidden="true"></i>
+              {% if has_unread_notifications %}
+                <span class="notif-dot" aria-hidden="true"></span>
+                <span class="visually-hidden">{{ unread_notifications_count }} notifications non lues</span>
+              {% endif %}
+            </a>
+            <!-- Profile avatar removed from header to keep header minimal; profile remains in sidebar -->
+          </div>
+        {% else %}
+          <a href="{% url 'student:login' %}" class="ub-btn ub-btn--primary">Se connecter</a>
+        {% endif %}
+      </div>
+    </header>
+
+    <div class="ub-layout">
+      <aside id="site-sidebar" class="ub-sidebar" aria-label="Menu latéral" hidden>
+        <nav role="navigation">
+          <ul class="nav-list">
+            <li class="nav-item"><a href="{% url 'student:dashboard' %}" class="nav-link"><span class="ub-icon" aria-hidden="true"><i class="fas fa-home"></i></span> <span class="nav-text">Tableau de bord</span></a></li>
+            <li class="nav-item"><a href="{% url 'student:book_list' %}" class="nav-link"><span class="ub-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span> <span class="nav-text">Livres</span></a></li>
+            <li class="nav-item"><a href="{% url 'student:my_borrows' %}" class="nav-link"><span class="ub-icon" aria-hidden="true"><i class="fas fa-book-reader"></i></span> <span class="nav-text">Emprunts</span></a></li>
+            <li class="nav-item"><a href="{% url 'student:my_reservations' %}" class="nav-link"><span class="ub-icon" aria-hidden="true"><i class="fas fa-clock"></i></span> <span class="nav-text">Réservations</span></a></li>
+            <li class="nav-item"><a href="{% url 'student:missing_request' %}" class="nav-link"><span class="ub-icon" aria-hidden="true"><i class="fas fa-plus-circle"></i></span> <span class="nav-text">Demande de livre</span></a></li>
+            <li class="nav-item"><a href="{% url 'student:notifications' %}" class="nav-link"><span class="ub-icon" aria-hidden="true"><i class="fas fa-bell"></i></span> <span class="nav-text">Notifications</span></a></li>
+            <li class="nav-item nav-item-profile"><a href="{% url 'student:profile' %}" class="nav-link"><span class="ub-icon" aria-hidden="true"><i class="fas fa-user-circle"></i></span> <span class="nav-text">Profil</span></a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="ub-main" role="main">
+        <div class="container">
+          {% for message in messages %}
+            <div class="message {{ message.tags }}" role="alert">{{ message }}</div>
+          {% endfor %}
+          
+          <section class="page-content">
+            {% block content %}{% endblock %}
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <footer class="ub-footer" role="contentinfo">
+      <div class="footer-content">
+        <small>Université — Bibliothèque — <strong>UniBooks</strong></small>
+      </div>
+    </footer>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="overlay" class="ub-overlay" hidden aria-hidden="true"></div>
+
+    <!-- Toast container (notifications) -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    {% block extra_scripts %}{% endblock %}
+    <script src="/static/main.js"></script>
+  </body>
+</html>

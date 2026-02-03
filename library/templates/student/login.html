@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Connexion — UniBooks</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body class="auth-layout">
+    {% load static %}
+    <main class="auth-page">
+      <div class="auth-container">
+        <!-- Left visual / branding panel removed as per request -->
+
+        <!-- Right form panel -->
+        <section class="auth-card auth-card-modern" role="region" aria-labelledby="login-title">
+          <div class="auth-card-inner">
+            <header class="auth-header">
+              <div class="brand-inline">
+                <img src="{% static 'images/logo_upc.png' %}" alt="UniBooks" class="brand-inline-logo" />
+                <div class="brand-inline-text">
+                  <span class="brand-inline-name">UniBooks</span>
+                  <small class="brand-inline-sub">Portail étudiant</small>
+                </div>
+              </div>
+
+              <h1 id="login-title" class="auth-title">Connexion sécurisée</h1>
+              <p class="auth-subtitle">Connectez-vous avec votre identifiant universitaire</p>
+            </header>
+
+            <form method="post" class="ub-form auth-form" novalidate aria-labelledby="login-title">
+              {% csrf_token %}
+
+              {% if form.non_field_errors %}
+                <div class="error-summary" role="alert" aria-live="polite">
+                  {{ form.non_field_errors }}
+                </div>
+              {% endif %}
+
+              <div class="form-grid">
+                <!-- Username / matricule -->
+                <label class="form-label" for="id_username">Identifiant académique</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z"/></svg>
+                  <input
+                    type="text"
+                    name="{{ form.username.html_name }}"
+                    id="{{ form.username.id_for_label }}"
+                    value="{{ form.username.value|default_if_none:'' }}"
+                    autocomplete="username"
+                    class="auth-input"
+                    placeholder="Ex. a123456 or prenom.nom@univ.edu"
+                    required
+                  />
+                </div>
+                {% if form.username.errors %}
+                  <span class="field-error" id="error-username">{{ form.username.errors|striptags }}</span>
+                {% endif %}
+
+                <!-- Password -->
+                <label class="form-label" for="id_password">Mot de passe</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M17 8V7a5 5 0 00-10 0v1H5v11h14V8h-2zm-8-1a3 3 0 016 0v1H9V7zm8 11H7V10h10v8z"/></svg>
+                  <input
+                    type="password"
+                    name="{{ form.password.html_name }}"
+                    id="{{ form.password.id_for_label }}"
+                    autocomplete="current-password"
+                    class="auth-input"
+                    placeholder="Votre mot de passe"
+                    required
+                  />
+                </div>
+                {% if form.password.errors %}
+                  <span class="field-error" id="error-password">{{ form.password.errors|striptags }}</span>
+                {% endif %}
+
+                <div class="form-extra">
+                  <label class="checkbox-inline">
+                    <input type="checkbox" name="remember" /> Rester connecté
+                  </label>
+                </div>
+              </div>
+
+              <div class="auth-actions">
+                  <button class="ub-btn ub-btn--primary btn-login ub-btn--full" type="submit" aria-live="polite">
+                    <span class="btn-spinner" aria-hidden="true"></span>
+                    <span class="btn-text">Se connecter</span>
+                  </button>
+              </div>
+            </form>
+
+            <footer class="auth-footer">
+              <p class="muted-text">Besoin d'aide ? Allez à la bibliothèque.</p>
+            </footer>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="/static/main.js"></script>
+  </body>
+</html>

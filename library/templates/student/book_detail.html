@@ -1,0 +1,105 @@
+{% extends 'student/base.html' %}
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+<article class="book-detail">
+  <div class="book-container">
+    <div class="left-col">
+      <figure class="cover-large">
+        {% if book.image %}
+          <img src="{{ book.image.url }}" alt="Couverture du livre : {{ book.title }}">
+        {% else %}
+          <div class="cover-placeholder">Aucune image disponible</div>
+        {% endif %}
+      </figure>
+    </div>
+
+    <div class="right-col">
+      <header class="book-header">
+        <h1 class="book-title">{{ book.title }}</h1>
+        <div class="book-meta">
+          <span class="authors"><strong>Auteur(s) :</strong> {{ book.authors }}</span>
+          <span class="category-badge">{{ book.category }}</span>
+        </div>
+      </header>
+
+      <section class="book-body">
+        <h3>Résumé</h3>
+        <p class="desc">{{ book.description }}</p>
+      </section>
+
+      <section class="book-info-box">
+        <div class="availability" aria-live="polite">
+          <span class="info-label">Disponibilité :</span>
+          <span class="count"><strong>{{ book.available_copies }}</strong> / {{ book.total_copies }}</span>
+          <span class="status-indicator {{ book.status }}">Statut : {{ book.status }}</span>
+        </div>
+      </section>
+
+      <div class="book-actions">
+        <div class="buttons-group">
+          <a class="ub-btn ub-btn--primary" href="{% url 'student:request_reserve' book.pk %}">Réserver</a>
+          <a class="ub-btn ub-btn--primary" href="{% url 'student:request_borrow' book.pk %}">Demander l'emprunt</a>
+
+          {# Render the same heart icon always; toggle 'liked' class to change color only #}
+          <a class="ub-btn ub-btn--outline like-btn {% if liked %}liked{% endif %}" href="{% url 'student:like_book' book.pk %}" title="{% if liked %}Retirer des favoris{% else %}Ajouter aux favoris{% endif %}">
+            <i class="fa-regular fa-heart" aria-hidden="true"></i>
+            <span class="visually-hidden">{% if liked %}Retirer des favoris{% else %}Ajouter aux favoris{% endif %}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<hr class="section-divider">
+
+<section class="comments-section" id="community-comments">
+  <header class="comments-header">
+    <h3>Commentaires & Discussions</h3>
+  </header>
+
+  <!-- Formulaire principal de commentaire -->
+  <div class="comment-form-container card">
+    <form method="post" action="{% url 'student:comment_book' book.pk %}" class="ub-form">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="comment-textarea" class="sr-only">Votre commentaire</label>
+        <textarea id="comment-textarea" name="content" rows="3" placeholder="Partagez votre avis sur cet ouvrage..." required></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="ub-btn ub-btn--primary">Publier le commentaire</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Liste des commentaires (imbriquée jusqu'à 2 niveaux)
+       Structure :
+         - comments: top-level (level 0)
+         - for each comment, render replies (level 1)
+         - for each reply, render its replies (level 2) but do NOT allow further replies
+  -->
+  <ul class="comments-list" aria-live="polite">
+    {% for c in comments %}
+      <li class="comment-item" id="comment-{{ c.pk }}">
+        <div class="comment-wrapper">
+          <header class="c-head">
+            {% if c.student.avatar %}
+              <img src="{{ c.student.avatar.url }}" alt="Avatar {{ c.student.get_full_name }}" class="comment-avatar">
+            {% else %}
+              <div class="comment-avatar-placeholder">{{ c.student.first_name|slice:":1" }}{{ c.student.last_name|slice:":1" }}</div>
+            {% endif %}
+            <span class="comment-author">{{ c.student.get_full_name }}</span>
+            <time class="comment-date">{{ c.created_at|date:"d M Y H:i" }}</time>
+          </header>
+          <div class="c-body">
+            <p>{{ c.content }}</p>
+          </div>
+        </div>
+      </li>
+    {% empty %}
+      <li class="no-comments card">Aucun commentaire pour le moment. Soyez le premier à donner votre avis.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

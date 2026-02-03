@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Redirection — {{ target_name }}</title>
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#f7fafc; color:#0f172a; }
+    .card { max-width:720px; margin:6vh auto; background:white; border-radius:8px; padding:28px; box-shadow:0 6px 20px rgba(2,6,23,0.08); }
+    a.button { display:inline-block; background:#0ea5a4; color:white; padding:10px 14px; border-radius:6px; text-decoration:none; }
+    .muted { color:#475569; }
+  </style>
+  <script>
+    // redirect after N seconds
+    (function (){
+      var seconds = {{ seconds|default:4 }} * 1000;
+      setTimeout(function(){ window.location.href = '{{ target_url }}'; }, seconds);
+    })();
+  </script>
+</head>
+<body>
+  <div class="card">
+    <h1>Page déplacée</h1>
+    <p class="muted">La page que vous essayez d'atteindre a été déplacée. Nous vous redirigeons vers <strong>{{ target_name }}</strong> dans <span id="counter">{{ seconds }}</span> secondes.</p>
+    <p>
+      <a class="button" href="{{ target_url }}">Aller maintenant vers {{ target_name }}</a>
+      <a style="margin-left:12px;" href="/" class="muted">Retour à l'accueil</a>
+    </p>
+    <p class="muted" style="margin-top:18px; font-size:0.9em;">Si votre navigateur ne redirige pas automatiquement, cliquez sur le bouton ci-dessus.</p>
+  </div>
+  <script>
+    // small live countdown
+    (function(){
+      var sec = {{ seconds|default:4 }};
+      var el = document.getElementById('counter');
+      if (!el) return;
+      var t = setInterval(function(){ sec -= 1; el.textContent = sec; if (sec <= 0) clearInterval(t); }, 1000);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+{% extends 'student/base.html' %}
+{% block title %}Suggérer une acquisition{% endblock %}
+
+{% block content %}
+<div class="content-header">
+  <h1 class="page-title">Suggérer une acquisition</h1>
+  <p class="page-subtitle">
+    Vous ne trouvez pas un ouvrage dans notre catalogue ? 
+    Faites une demande d'acquisition auprès de l'équipe bibliothécaire.
+  </p>
+</div>
+
+<section class="request-form-section">
+  <div class="form-container-boxed">
+    <div class="instruction-box">
+      <p><strong>Note :</strong> Merci de vérifier au préalable sur le catalogue si l'ouvrage n'est pas simplement en cours d'emprunt. Précisez le plus d'informations possible (ISBN, Édition) pour accélérer le traitement.</p>
+    </div>
+
+    <form method="post" class="ub-form-modern">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="message error" role="alert">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <div class="form-grid">
+        {% for field in form %}
+          <div class="form-field-group {% if field.errors %}has-error{% endif %}">
+            <label for="{{ field.id_for_label }}">
+              {{ field.label }}
+              {% if field.field.required %}<span class="required-mark">*</span>{% endif %}
+            </label>
+            
+            <div class="input-control">
+              {{ field }}
+            </div>
+
+            {% if field.help_text %}
+              <small class="help-text">{{ field.help_text }}</small>
+            {% endif %}
+
+            {% if field.errors %}
+              <div class="field-error-msg">
+                {{ field.errors|striptags }}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="form-footer-actions">
+        <button type="submit" class="ub-btn ub-btn--primary ub-btn--large">
+          Soumettre la suggestion
+        </button>
+        <a href="{% url 'student:dashboard' %}" class="ub-btn ub-btn--ghost">Annuler</a>
+      </div>
+    </form>
+  </div>
+</section>
+
+<aside class="support-info">
+  <div class="info-card">
+    <h4>Délai de traitement</h4>
+    <p>Les demandes sont examinées par la commission documentaire chaque jeudi. Vous recevrez une notification dès que la décision d'achat sera validée.</p>
+  </div>
+</aside>
+
+{% endblock %}

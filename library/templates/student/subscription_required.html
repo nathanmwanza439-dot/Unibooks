@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Abonnement requis — UniBooks</title>
+    {% load static %}
+    <link href="/static/styles.css" rel="stylesheet">
+  </head>
+  <body class="auth-layout">
+    <main class="auth-page">
+      <div class="auth-container">
+        <section class="auth-card auth-card-modern" role="region" aria-labelledby="subreq-title">
+          <div class="auth-card-inner">
+            <header class="auth-header">
+              <div class="brand-inline">
+                <img src="{% static 'images/logo_upc.png' %}" alt="UniBooks" class="brand-inline-logo" />
+                <div class="brand-inline-text">
+                  <span class="brand-inline-name">UniBooks</span>
+                  <small class="brand-inline-sub">Portail étudiant</small>
+                </div>
+              </div>
+
+              <h1 id="subreq-title" class="auth-title">Accès restreint — Abonnement expiré</h1>
+              <p class="auth-subtitle">Votre abonnement aux services de la bibliothèque a expiré. Renouvelez au guichet pour retrouver l'accès complet.</p>
+            </header>
+
+            <div class="auth-body">
+              <div class="card">
+                <p class="muted">Pour continuer à emprunter des ouvrages ou consulter certaines ressources, vous devez renouveler votre abonnement.</p>
+
+                <div style="margin-top:1rem;">
+                  <p><strong>Informations sur l’abonnement :</strong></p>
+                  <ul>
+                    <li>Statut : {% if subscription_status %}{{ subscription_status }}{% else %}{% if profile_user and not profile_user.date_paiement %}Aucun{% else %}—{% endif %}{% endif %}</li>
+                    <li>Date d'expiration : {% if subscription_end %}{{ subscription_end|date:'d F Y' }}{% else %}{% if profile_user and profile_user.date_paiement %}{{ profile_user.date_paiement|date:'d F Y'|add:' +31 days' }}{% else %}—{% endif %}{% endif %}</li>
+                  </ul>
+                </div>
+
+                <p class="muted">Pour renouveler votre abonnement, rendez-vous au guichet de la bibliothèque muni(e) de votre carte étudiante.</p>
+
+                <div style="margin-top:1rem; display:flex; gap:0.5rem;">
+                  <a href="{% url 'student:login' %}" class="ub-btn ub-btn--ghost">Retour à la connexion</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="/static/main.js"></script>
+  </body>
+</html>

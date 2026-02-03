@@ -1,0 +1,186 @@
+{% extends 'student/base.html' %}
+{% block title %}Profil Utilisateur{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+  
+  <header class="profile-header-banner">
+    <div class="profile-identity">
+      <div class="profile-photo-wrapper">
+        <div class="profile-photo-placeholder">
+          {% if profile_user.avatar %}
+            <img src="{{ profile_user.avatar.url }}" alt="Photo de {{ profile_user.get_full_name }}" class="profile-photo-image">
+          {% else %}
+            <div class="profile-photo-initials" aria-hidden="true">{{ profile_user.first_name|slice:":1" }}{{ profile_user.last_name|slice:":1" }}</div>
+          {% endif %}
+        </div>
+        {% if request.user == profile_user %}
+          <form method="post" enctype="multipart/form-data" class="avatar-upload-form" style="margin-top:0.6rem; display:inline;">
+            {% csrf_token %}
+            <label class="ub-btn ub-btn--ghost" for="id_avatar">Changer la photo</label>
+            <input id="id_avatar" name="avatar" type="file" accept="image/*" style="display:none;">
+            <!-- Upload is auto-submitted when a file is picked; no "Enregistrer" button needed -->
+          </form>
+
+          {% if profile_user.avatar %}
+            <form method="post" class="avatar-remove-form" style="display:inline; margin-left:0.6rem;">
+              {% csrf_token %}
+              <input type="hidden" name="remove_avatar" value="1">
+              <button type="submit" class="ub-btn ub-btn--ghost ub-btn--danger">Enlever la photo</button>
+            </form>
+          {% endif %}
+        {% endif %}
+      </div>
+      <div class="profile-info-main">
+        <h1 class="user-name">{{ profile_user.get_full_name }}</h1>
+        <div class="user-badges">
+          <span class="ub-badge ub-badge--muted">ID: {{ profile_user.matricule|default:'N/A' }}</span>
+          <span class="ub-badge ub-badge--muted">{{ profile_user.faculty|default:'Département non défini' }}</span>
+        </div>
+        <p class="account-status-row">
+          Statut du compte : <span class="status-indicator status-{{ account_status.code }}">{{ account_status.label }}</span>
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <div class="profile-grid">
+    
+    <div class="profile-main-col">
+      <section class="profile-card card-boxed">
+        <div class="card-header">
+          <h2>Informations personnelles</h2>
+        </div>
+        <div class="card-body">
+          <dl class="info-description-list">
+            <div class="info-row">
+              <dt>Nom complet</dt>
+              <dd>{{ profile_user.last_name }} {{ profile_user.first_name }}</dd>
+            </div>
+            <div class="info-row">
+              <dt>Matricule</dt>
+              <dd>{{ profile_user.matricule|default:'N/A' }}</dd>
+            </div>
+            <div class="info-row">
+              <dt>E-mail</dt>
+              <dd><code>{{ profile_user.email|default:'Non renseigné' }}</code></dd>
+            </div>
+            <div class="info-row">
+              <dt>Téléphone</dt>
+              <dd>{{ profile_user.phone|default:'Non renseigné' }}</dd>
+            </div>
+            <div class="info-row">
+              <dt>Adresse de résidence</dt>
+              <dd>{{ profile_user.address|default:'Non renseignée' }}</dd>
+            </div>
+            <div class="info-row">
+              <dt>Membre depuis le</dt>
+              <dd><time datetime="{{ profile_user.date_joined|date:'Y-m-d' }}">{{ profile_user.date_joined|date:"d F Y" }}</time></dd>
+            </div>
+          </dl>
+          <div class="info-footer">
+            <p class="muted-text small">
+              <span class="icon" aria-hidden="true"><i class="fas fa-lock" aria-hidden="true"></i></span>
+              Les informations ne peuvent être modifiées que par le service administratif.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="profile-card card-boxed">
+        <div class="card-header">
+          <h2>Activité récente</h2>
+        </div>
+        <div class="card-body">
+          <ul class="activity-timeline">
+            {% for a in activities %}
+              <li class="activity-item">
+                <time class="activity-date">{{ a.when }}</time>
+                <p class="activity-text">{{ a.text }}</p>
+              </li>
+            {% empty %}
+              <li class="empty-list">Aucun historique d'activité récent.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <aside class="profile-aside-col">
+      <section class="profile-card card-boxed status-card">
+        <div class="card-header">
+          <h2>Droits de bibliothèque</h2>
+        </div>
+        <div class="card-body">
+          <ul class="rights-list">
+            <li class="right-item checked">
+              <i class="fas fa-check" aria-hidden="true"></i> Service d'emprunt activé
+            </li>
+            <li class="right-item checked">
+              <i class="fas fa-check" aria-hidden="true"></i> Réservations autorisées
+            </li>
+          </ul>
+          <div class="subscription-info" style="margin-top:0.8rem;">
+            <h2 style="margin:0 0 0.4rem 0;">Abonnement</h2>
+            {% if date_paiement %}
+              <p class="small muted">Début : <time datetime="{{ date_paiement|date:'Y-m-d' }}">{{ date_paiement|date:"d M Y" }}</time></p>
+              <p class="small muted">Fin prévue : <time datetime="{{ date_expiration|date:'Y-m-d' }}">{{ date_expiration|date:"d M Y" }}</time></p>
+              {% if subscription_active %}
+                <p class="small"><strong>{{ subscription_days_left }} jour{% if subscription_days_left > 1 %}s{% endif %} restants</strong></p>
+              {% else %}
+                <p class="small"><strong class="text-danger">Abonnement expiré</strong></p>
+              {% endif %}
+            {% else %}
+              <p class="small muted">Aucun abonnement actif.</p>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      <section class="profile-card card-boxed security-card">
+        <div class="card-header">
+          <h2>Sécurité & Accès</h2>
+        </div>
+        <div class="card-body">
+          {% if profile_user.force_password_change %}
+            <div class="alert alert-warning" role="alert">
+              <strong>Action requise :</strong> Votre mot de passe actuel est temporaire. Pour des raisons de sécurité, veuillez le modifier.
+            </div>
+          {% endif %}
+          
+          <div class="security-status">
+            <span class="status-label">Authentification :</span>
+            <span class="status-text">
+              {% if profile_user.force_password_change %}Standard (Provisoire){% else %}Sécurisée (Personnalisée){% endif %}
+            </span>
+          </div>
+
+          <div class="profile-actions">
+            <a class="ub-btn ub-btn--outline ub-btn--full" href="{% url 'student:password_change' %}">Changer le mot de passe</a>
+            <hr class="spacer">
+            <a class="ub-btn ub-btn--ghost ub-btn--danger ub-btn--full" href="{% url 'student:logout' %}">Déconnexion de la session</a>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var input = document.getElementById('id_avatar');
+  if (input) {
+    input.addEventListener('change', function(){
+      if (this.files && this.files.length > 0) {
+        // submit the parent form (upload form)
+        var form = this.closest('form');
+        if (form) form.submit();
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

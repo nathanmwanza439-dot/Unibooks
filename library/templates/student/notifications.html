@@ -1,0 +1,58 @@
+{% extends 'student/base.html' %}
+{% block title %}Centre de notifications{% endblock %}
+
+{% block content %}
+<header class="content-header">
+  <h1 class="page-title">Centre de notifications</h1>
+  <p class="page-subtitle">Restez informé de l'état de vos emprunts et réservations.</p>
+</header>
+
+<!-- Utilise la même structure/présentation que la page "Mes emprunts" -->
+<section class="borrows-section">
+  <div class="borrows-list-container">
+    {% for n in notifications %}
+      <article class="borrow-card {% if not n.read %}unread-highlight{% endif %}">
+        <div class="borrow-main-info">
+          <div class="borrow-details">
+            <h3 class="borrow-book-title">Notification</h3>
+
+            <div class="notif-body">
+              <p class="notif-text">{{ n.message }}</p>
+            </div>
+          </div>
+
+          <div class="borrow-deadline">
+            <div class="deadline-box">
+              <span class="deadline-label">Reçu</span>
+              <time class="deadline-date" datetime="{{ n.created_at|date:'Y-m-d H:i' }}">
+                <strong>{{ n.created_at|timesince }} auparavant</strong>
+              </time>
+            </div>
+          </div>
+        </div>
+
+        <footer class="borrow-actions">
+          {% if not n.read %}
+            <span class="unread-badge">Nouveau</span>
+          {% endif %}
+
+          <!-- Action de consultation si la notification a une URL (optionnel) -->
+          {% if n.extra and n.extra.link %}
+            <a href="{{ n.extra.link }}" class="ub-btn ub-btn--ghost btn-link-action">Consulter</a>
+          {% endif %}
+        </footer>
+      </article>
+    {% empty %}
+      <div class="empty-state-container">
+        <div class="empty-illustration"></div>
+        <p class="empty-text">Votre boîte de réception est vide.</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<aside class="notif-settings-info">
+  <p><small>Note : Vous recevez également une copie de ces notifications sur votre adresse email universitaire.</small></p>
+</aside>
+
+{% endblock %}

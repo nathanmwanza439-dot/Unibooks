@@ -1,0 +1,62 @@
+{% extends 'student/base.html' %}
+{% block title %}Mes emprunts{% endblock %}
+
+{% block content %}
+<header class="content-header">
+  <h1 class="page-title">Mes emprunts</h1>
+  <p class="page-subtitle">Suivez vos lectures en cours et vos dates d'échéance.</p>
+</header>
+
+<section class="borrows-section">
+  <div class="borrows-list-container">
+    {% for b in borrows %}
+      <article class="borrow-card">
+        <div class="borrow-main-info">
+          <div class="borrow-details">
+            <h3 class="borrow-book-title">
+              <a href="{% url 'student:book_detail' b.book.pk %}">{{ b.book.title }}</a>
+            </h3>
+            
+            <div class="borrow-meta">
+              <span class="status-badge status-{{ b.status|lower }}">
+                {{ b.get_status_display }}
+              </span>
+              
+              {% if b.borrow_date %}
+                <span class="date-info">
+                  <span class="label">Emprunté le :</span> 
+                  <time datetime="{{ b.borrow_date|date:'Y-m-d' }}">{{ b.borrow_date|date:"d M Y" }}</time>
+                </span>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if b.due_date %}
+          <div class="borrow-deadline">
+            <div class="deadline-box">
+              <span class="deadline-label">À rendre avant le</span>
+              <time class="deadline-date" datetime="{{ b.due_date|date:'Y-m-d' }}">
+                <strong>{{ b.due_date|date:"d F Y" }}</strong>
+              </time>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <footer class="borrow-actions">
+          <a href="{% url 'student:book_detail' b.book.pk %}" class="ub-btn ub-btn--ghost btn-link-action">
+            Consulter la fiche ouvrage
+          </a>
+        </footer>
+      </article>
+    {% empty %}
+      <div class="empty-state-container">
+        <div class="empty-illustration"></div>
+        <p class="empty-text">Aucun emprunt n'est enregistré sur votre compte pour le moment.</p>
+  <a href="{% url 'student:book_list' %}" class="ub-btn ub-btn--primary">Parcourir le catalogue</a>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

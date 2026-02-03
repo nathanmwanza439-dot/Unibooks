@@ -1,0 +1,24 @@
+{% extends "admin/index.html" %}
+{% load admin_badges %}
+
+{% block content %}
+<div style="margin-bottom:1rem;">
+</div>
+<div style="display:flex; gap:1rem; margin-bottom:1rem; align-items:center;">
+  <a href="{% missingrequest_admin_url %}" style="text-decoration:none;">
+    <strong>Demandes d'achat</strong>
+    <span style="display:inline-block; background:#d9534f; color:#fff; padding:2px 8px; border-radius:12px; font-size:0.9em; margin-left:0.5rem;">{% unhandled_missing_count %}</span>
+  </a>
+
+  <a href="{% borrowrequest_admin_url %}" style="text-decoration:none;">
+    <strong>Demandes d'emprunt</strong>
+    <span style="display:inline-block; background:#f59e0b; color:#0f172a; padding:2px 8px; border-radius:12px; font-size:0.9em; margin-left:0.5rem;">{% pending_borrow_count %}</span>
+  </a>
+
+  <a href="{% reservation_admin_url %}" style="text-decoration:none;">
+    <strong>Réservations</strong>
+    <span style="display:inline-block; background:#06b6d4; color:#fff; padding:2px 8px; border-radius:12px; font-size:0.9em; margin-left:0.5rem;">{% pending_reservation_count %}</span>
+  </a>
+</div>
+{{ block.super }}
+{% endblock %}

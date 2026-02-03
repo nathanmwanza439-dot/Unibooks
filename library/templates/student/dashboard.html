@@ -1,0 +1,127 @@
+{% extends 'student/base.html' %}
+{% block title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<header class="content-header">
+  <h1 class="page-title">Tableau de bord</h1>
+  <p class="page-subtitle">Bienvenue sur votre espace personnel UniBooks.</p>
+</header>
+
+<section class="stats-overview" aria-label="Résumé de votre activité">
+  <div class="cards">
+    <article class="ub-card ub-card--stat">
+      <div class="ub-card__body">
+        <h3 class="card-label">Livres empruntés</h3>
+        <p class="big counter">{{ borrows.count }}</p>
+      </div>
+      <footer class="ub-card__footer">
+        <a href="{% url 'student:my_borrows' %}" class="ub-card__link ub-btn ub-btn--ghost">Gérer mes emprunts</a>
+      </footer>
+    </article>
+
+    <article class="ub-card ub-card--stat">
+      <div class="ub-card__body">
+        <h3 class="card-label">Réservations</h3>
+        <p class="big counter">{{ reservations.count }}</p>
+      </div>
+      <footer class="ub-card__footer">
+        <a href="{% url 'student:my_reservations' %}" class="ub-card__link ub-btn ub-btn--ghost">Voir mes réservations</a>
+      </footer>
+    </article>
+
+    <article class="ub-card ub-card--stat">
+      <div class="ub-card__body">
+        <h3 class="card-label">Notifications</h3>
+        <p class="big counter">{{ notifications|length }}</p>
+      </div>
+      <footer class="ub-card__footer">
+        <a href="{% url 'student:notifications' %}" class="ub-card__link ub-btn ub-btn--ghost">Consulter mes alertes</a>
+      </footer>
+    </article>
+  </div>
+</section>
+
+<!-- Nouveautés: livres ajoutés récemment (5 derniers jours) -->
+<section class="recent-section">
+  <header class="content-header">
+    <h1 class="page-title">Nouveautés (5 derniers jours)</h1>
+    <p class="page-subtitle">Les dernières acquisitions ajoutées récemment.</p>
+  </header>
+
+  <div class="recent-books-grid">
+    {% if recent_books and recent_books|length > 0 %}
+      {% for book in recent_books %}
+        <article class="ub-card ub-card--book-small">
+          <a href="{% url 'student:book_detail' book.pk %}">
+            <div class="cover-thumb">
+              {% if book.image %}
+                <img src="{{ book.image.url }}" alt="Couverture de {{ book.title }}" loading="lazy">
+              {% else %}
+                <i class="fas fa-book fa-2x" aria-hidden="true"></i>
+              {% endif %}
+            </div>
+            <div class="meta">
+              <h4 class="mini-title">{{ book.title }}</h4>
+              <p class="mini-author">{{ book.authors }}</p>
+              <p class="small muted">Ajouté le {{ book.created_at|date:"d M Y" }}</p>
+            </div>
+          </a>
+        </article>
+      {% endfor %}
+    {% elif books and books|length > 0 %}
+      {# Fallback: afficher quelques livres si recent_books n'est pas fourni par la vue #}
+      {% for book in books|slice:":6" %}
+        <article class="ub-card ub-card--book-small">
+          <a href="{% url 'student:book_detail' book.pk %}">
+            <div class="cover-thumb">
+              {% if book.image %}
+                <img src="{{ book.image.url }}" alt="Couverture de {{ book.title }}" loading="lazy">
+              {% else %}
+                <i class="fas fa-book fa-2x" aria-hidden="true"></i>
+              {% endif %}
+            </div>
+            <div class="meta">
+              <h4 class="mini-title">{{ book.title }}</h4>
+              <p class="mini-author">{{ book.authors }}</p>
+            </div>
+          </a>
+        </article>
+      {% endfor %}
+    {% else %}
+      <p class="muted">Aucun nouveau livre enregistré récemment.</p>
+    {% endif %}
+  </div>
+
+  <div class="section-footer">
+    <a href="{% url 'student:book_list' %}" class="ub-btn ub-btn--ghost">Parcourir tout le catalogue</a>
+  </div>
+</section>
+
+<!-- Information block: astuces et annonces de la bibliothèque -->
+<section class="info-section">
+  <header class="content-header">
+    <h1 class="page-title">Info</h1>
+    <p class="page-subtitle">La bibliothèque partagera ici des informations et des astuces utiles.</p>
+  </header>
+
+  <div class="info-cards">
+    <article class="card">
+      <h4>Conseil du jour</h4>
+      {% if site_info and site_info.conseil_du_jour %}
+        <p class="muted small">{{ site_info.conseil_du_jour|linebreaksbr }}</p>
+      {% else %}
+        <p class="muted small">Aucun conseil du jour pour le moment.</p>
+      {% endif %}
+    </article>
+
+    <article class="card">
+      <h4>Annonce</h4>
+      {% if site_info and site_info.annonce %}
+        <p class="muted small">{{ site_info.annonce|linebreaksbr }}</p>
+      {% else %}
+        <p class="muted small">Aucune annonce pour le moment.</p>
+      {% endif %}
+    </article>
+  </div>
+</section>
+{% endblock %}
