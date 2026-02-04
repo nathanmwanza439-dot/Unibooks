@@ -1,1 +1,1 @@
-web: gunicorn unibooks.wsgi --log-file -
+web: bash start.sh
