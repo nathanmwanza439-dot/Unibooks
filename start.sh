@@ -5,6 +5,10 @@ set -euo pipefail
 # This is safe to run on boot and helpful if you prefer migrations at startup.
 
 echo "[start.sh] Running database migrations..."
+# Default to the production settings module unless another is provided.
+export DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE:-unibooks.settings_production}
+echo "[start.sh] Using settings module: ${DJANGO_SETTINGS_MODULE}"
+
 python manage.py migrate --noinput
 
 echo "[start.sh] Collecting static files..."

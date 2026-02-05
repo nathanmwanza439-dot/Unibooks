@@ -10,7 +10,15 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'replace-me-in-development')
 # DEBUG should be False in production. Override in production settings.
 DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split() if os.environ.get('DJANGO_ALLOWED_HOSTS') else []
+# Configure ALLOWED_HOSTS from environment. If not provided and DEBUG is False,
+# allow all hosts to reduce friction during first deploys on platforms like
+# Railway. In a locked-down production environment you should set
+# DJANGO_ALLOWED_HOSTS explicitly (e.g. "example.com www.example.com").
+ALLOWED_HOSTS_ENV = os.environ.get('DJANGO_ALLOWED_HOSTS')
+if ALLOWED_HOSTS_ENV:
+    ALLOWED_HOSTS = ALLOWED_HOSTS_ENV.split()
+else:
+    ALLOWED_HOSTS = ['*'] if not DEBUG else []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -96,8 +104,15 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Where `collectstatic` will collect static files for production
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-# Use WhiteNoise compressed manifest storage in production
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Use WhiteNoise compressed manifest storage in production only (when
+# DEBUG is False). Keeping the default during local development avoids
+# ManifestStaticFilesStorage errors when collectstatic hasn't been run.
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# If Django is behind a proxy (Railway's router), respect the X-Forwarded
+# proto header so request.is_secure() works correctly.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Optional: configure S3 storage for MEDIA files if AWS credentials are provided.
 # This allows using S3 (or compatible storage) for uploaded files in production.
