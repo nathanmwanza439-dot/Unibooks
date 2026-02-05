@@ -77,9 +77,22 @@ DATABASES = {
 # Allow configuring the database via the DATABASE_URL environment variable (Render/Postgres)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
-    }
+    # Defensive parsing: provide a clear error if DATABASE_URL is malformed.
+    if 'port' in DATABASE_URL:
+        raise RuntimeError(
+            "Invalid DATABASE_URL: it contains the literal 'port' placeholder. "
+            "Replace 'port' with the actual port number (e.g. 5432). Example: "
+            "postgres://user:password@host:5432/dbname"
+        )
+    try:
+        DATABASES = {
+            'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+        }
+    except Exception as exc:
+        raise RuntimeError(
+            "Failed to parse DATABASE_URL environment variable. Ensure it is a valid "
+            "database URL (e.g. postgres://user:password@host:5432/dbname)."
+        ) from exc
 
 AUTH_PASSWORD_VALIDATORS = [
     {
