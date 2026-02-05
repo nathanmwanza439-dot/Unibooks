@@ -63,15 +63,27 @@ echo "[start.sh] Starting Gunicorn on 0.0.0.0:${PORT} using ${PYTHON} -m gunicor
 # DJANGO_SUPERUSER_USERNAME, DJANGO_SUPERUSER_EMAIL, DJANGO_SUPERUSER_PASSWORD
 if [ -n "${DJANGO_SUPERUSER_USERNAME:-}" ] && [ -n "${DJANGO_SUPERUSER_PASSWORD:-}" ]; then
 	echo "[start.sh] Detected DJANGO_SUPERUSER_USERNAME and DJANGO_SUPERUSER_PASSWORD — ensuring superuser exists..."
-	# Run a short Django snippet to create the superuser if it doesn't exist.
-	$PYTHON manage.py shell -c "from django.contrib.auth import get_user_model; User=get_user_model();\
-u=User.objects.filter(username=\"${DJANGO_SUPERUSER_USERNAME}\").first();\
-if not u:\
-	User.objects.create_superuser(username=\"${DJANGO_SUPERUSER_USERNAME}\", email=\"${DJANGO_SUPERUSER_EMAIL:-}\", password=\"${DJANGO_SUPERUSER_PASSWORD}\");\
-	print(\"[start.sh] Superuser created: ${DJANGO_SUPERUSER_USERNAME}\");\
-else:\
-	print(\"[start.sh] Superuser already exists: ${DJANGO_SUPERUSER_USERNAME}\");\
-"
+	# Run a short multi-line Django script to create the superuser if it doesn't exist.
+	# Use a heredoc to avoid quoting/semicolon issues.
+	$PYTHON manage.py shell <<'PY'
+from django.contrib.auth import get_user_model
+import os
+
+User = get_user_model()
+username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+email = os.environ.get('DJANGO_SUPERUSER_EMAIL', '')
+
+if not username or not password:
+	print('[start.sh] Missing DJANGO_SUPERUSER_USERNAME or DJANGO_SUPERUSER_PASSWORD; skipping superuser creation')
+else:
+	u = User.objects.filter(username=username).first()
+	if not u:
+		User.objects.create_superuser(username=username, email=email, password=password)
+		print(f'[start.sh] Superuser created: {username}')
+	else:
+		print(f'[start.sh] Superuser already exists: {username}')
+PY
 fi
 
 # Use python -m gunicorn to ensure the gunicorn runner matches the active Python interpreter
