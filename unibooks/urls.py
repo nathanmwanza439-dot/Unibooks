@@ -4,6 +4,7 @@ from django.views.generic import RedirectView, TemplateView
 from library import views as library_views
 from django.conf import settings
 from django.conf.urls.static import static
+import os
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,6 +35,8 @@ urlpatterns = [
     # NOTE: removed the duplicate inclusion under '/student/' to avoid namespace ambiguity
 ]
 
-# Serve media files during development
-if settings.DEBUG:
+# Serve media files during development. Some PaaS (like Railway) do not serve
+# uploaded MEDIA files by default; for quick deployments we allow enabling
+# media serving in production by setting the env var DJANGO_SERVE_MEDIA=1.
+if settings.DEBUG or os.environ.get('DJANGO_SERVE_MEDIA') == '1':
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
