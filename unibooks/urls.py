@@ -7,6 +7,8 @@ from django.conf.urls.static import static
 import os
 
 urlpatterns = [
+    # quick health endpoint for PaaS probes
+    path('healthz', library_views.health),
     path('admin/', admin.site.urls),
     # compatibility redirect for old custom admin path
     path('library-admin/', RedirectView.as_view(url='/admin/', permanent=False)),

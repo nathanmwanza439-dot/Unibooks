@@ -58,6 +58,11 @@ def media_fallback(request, path):
     return HttpResponseNotFound(f"Media file not found: {path}")
 
 
+def health(request):
+    """Lightweight healthcheck endpoint for PaaS probes."""
+    return HttpResponse('OK', content_type='text/plain')
+
+
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class StudentLoginView(LoginView):
     template_name = 'student/login.html'
