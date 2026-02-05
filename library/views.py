@@ -103,8 +103,16 @@ def media_fallback(request, path):
         mime, _ = mimetypes.guess_type(chosen_path)
         return FileResponse(open(chosen_path, 'rb'), content_type=mime or 'application/octet-stream')
 
-    logger.info('media_fallback: no candidate found for %s', path)
-    return HttpResponseNotFound(f"Media file not found: {path}")
+        logger.info('media_fallback: no candidate found for %s', path)
+        # As a last resort, serve a small inline SVG placeholder so the UI shows a
+        # reasonable fallback instead of a broken image. This avoids 404s on the
+        # front-end while you fix persistent storage or re-upload missing files.
+        svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="200" height="300">
+    <rect width="100%" height="100%" fill="#eeeeee"/>
+    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#777" font-family="Arial,Helvetica,sans-serif" font-size="16">No cover</text>
+    <text x="50%" y="65%" dominant-baseline="middle" text-anchor="middle" fill="#999" font-family="Arial,Helvetica,sans-serif" font-size="10">{os.path.basename(path)}</text>
+</svg>'''
+        return HttpResponse(svg, content_type='image/svg+xml')
 
 
 def health(request):
